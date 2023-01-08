@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CP750_remote</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        #volume {
+            -webkit-appearance: slider-vertical;
+            width: 50px;
+            height: 200px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .form {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #mute:checked {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <form>
+        <div class="container">
+            <h1>Dolby CP750 web kezelő</h1>
+            <div class="form">
+                <div class="volume">
+                    <input type="range" name="volume" min="0" max="100" value="50" id="volume" oninput="rangeChangeSend()">
+                    <label for="volume" id="vol_lab">0</label>
+                    <input type="checkbox" name="mute" value="Mute" id="mute" onchange="mute()">
+                    <label for="mute">Mute</label>
+                </div>
+                <div class="inputs">
+                    <div class="input">
+                        <input type="radio" id="d1" name="input" value="d1" onclick="s">
+                        <label for="d1">Digital1</label>
+                    </div>
+                    <div class="input"><input type="radio" id="d2" name="input" value="d2">
+                        <label for="d2">Digital2</label>
+                    </div>
+                    <div class="input"><input type="radio" id="d3" name="input" value="d3">
+                        <label for="d3">Digital3</label>
+                    </div>
+                    <div class="input"><input type="radio" id="d4" name="input" value="d4">
+                        <label for="d4">Digital4</label>
+                    </div>
+                    <div class="input"><input type="radio" id="ma" name="input" value="ma">
+                        <label for="ma">Multichannel analog</label>
+                    </div>
+                    <div class="input"><input type="radio" id="ns" name="input" value="ns">
+                        <label for="ns">NonSync</label>
+                    </div>
+                    <div class="input"><input type="radio" id="mic" name="input" value="mic">
+                        <label for="mic">Mic</label>
+                    </div>
+                </div>
+            </div>
+
+            <footer>
+                <p>Created by <a href="hbj.hu">Halla Bálint</a></p>
+            </footer>
+        </div>
+    </form>
+    <script>
+        const socket = io();
+        socket.on('rangeChange', (data) => {
+            var range = document.getElementById("volume");
+            var label = document.getElementById("vol_lab");
+            range.value = input;
+            label.innerHTML = (input/10).toFixed(1);
+        })
+
+        socket.on('mute', (data) => {
+            var mute = document.getElementById("mute");
+            mute.checked = data;
+        })
+
+
+        function rangeChangeSend() {
+            var range = document.getElementById("volume");
+            var label = document.getElementById("vol_lab");
+            label.innerHTML = (range.value/10).toFixed(1);
+            socket.emit('rangeChange', range.value);
+        }
+
+        function mute() {
+            var mute = document.getElementById("mute");
+            socket.emit('mute', mute.checked);
+        }
+
+    </script>
+</body>
+
+</html>
